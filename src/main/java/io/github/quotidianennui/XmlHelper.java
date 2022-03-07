@@ -21,17 +21,20 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 public class XmlHelper {
+
   private static final String XINCLUDE_FIXUP_BASE_URI_FEATURE = "http://apache.org/xml/features/xinclude/fixup-base-uris";
   private static final String XINCLUDE_FEATURE = "http://apache.org/xml/features/xinclude";
 
-  static Document roundTripAndLoad(InputStream source, OutputStream target) throws Exception{
+  private static final ThreadLocal<XPath> XPATH_UTIL = ThreadLocal.withInitial(() -> xpathFactory().newXPath());
+
+  public static Document roundTripAndLoad(InputStream source, OutputStream target) throws Exception {
     DocumentBuilder builder = newBuilderFactory().newDocumentBuilder();
     Document resolved = builder.parse(source);
     write(resolved, target);
     return resolved;
   }
 
-  static void write(Document input, OutputStream target) throws Exception {
+  public static void write(Document input, OutputStream target) throws Exception {
     StreamResult result = new StreamResult(target);
     DOMSource dom = new DOMSource(input);
     Transformer serializer = TransformerFactory.newInstance().newTransformer();
@@ -81,8 +84,7 @@ public class XmlHelper {
   }
 
   private static String uniqueIdOrNull(Element elem) throws Exception {
-    XPath xpath = xpathFactory().newXPath();
-    return xpath.evaluate("./unique-id", elem);
+    return XPATH_UTIL.get().evaluate("./unique-id", elem);
   }
 
   private static int getIndex(Element elem, List<Element> siblings) {

@@ -18,24 +18,28 @@ $ ./gradlew [-PinterlokConfigFile=/path/to/file]
 > Task :emitXpaths
 {
   "variableXpaths" : {
-    "/adapter/channel-list/channel[1]/auto-start" : "${channel.auto.start}",
-    "/adapter/channel-list/channel[2]/auto-start" : "${channel.auto.start}",
-    "/adapter/shared-components/connections/elastic-rest-connection/transport-url" : "${local.elastic.transporturl}",
-    "/adapter/shared-components/services/service-list[1]/services/json-transform-service/mapping-spec/url" : "${adapter.base.url}/config/flatten-speedtest-output.json",
-    "/adapter/shared-components/services/service-list[2]/services/standalone-producer/producer/index" : "${elastic.speedtest.index}",
-    "/adapter/shared-components/services/service-list[1]/services/system-command-executor/command-builder/executable-path" : "${speedtest-cli.path}"
+    "/adapter/shared-components/services/service-list[unique-id=\"doSpeedtest\"]/services/json-transform-service[unique-id=\"flatten-json-output\"]/mapping-spec/url" : "${adapter.base.url}/config/flatten-speedtest-output.json",
+    "/adapter/shared-components/services/service-list[unique-id=\"doSpeedtest\"]/services/system-command-executor[unique-id=\"execute-speedtest\"]/command-builder/executable-path" : "${speedtest-cli.path}",
+    "/adapter/channel-list/channel[unique-id=\"ON_DEMAND\"]/auto-start" : "${channel.auto.start}",
+    "/adapter/shared-components/services/service-list[unique-id=\"doElasticINDEX\"]/services/standalone-producer[unique-id=\"index-elastic-document\"]/producer[unique-id=\"gloomy-snyder\"]/index" : "${elastic.speedtest.index}",
+    "/adapter/channel-list/channel[unique-id=\"SPEEDTEST_TO_ES\"]/auto-start" : "${channel.auto.start}",
+    "/adapter/shared-components/connections/elastic-rest-connection[unique-id=\"local-elasticsearch\"]/transport-url" : "${local.elastic.transporturl}"
   }
 }
 ```
 
 - You should now be able to between `adapter.xml.monolithic` and the console output to manually retrofit a config-json that's suitable for the UI
+    - In the above example one of the XPaths will not validate correctly, which is `gloomy-snyder` since this is _too granular_.
+    - Once you have successfully opened the project in the UI then make sure you resolve the warnings on the variable-xpaths tab in the UI.
 
 ## Additional info
 
 - You can override the working directory by using `-PuiXpathWorkingDir=/some/path` but bear in mind at that point _interlokConfigPath_ is relative to your specified working directory.
 - Compiled for Java8, not apropos of anything, It'll still work with Java 11.
 - It has no direct dependencies on interlok
-- If you attempt to validate the Variable XPaths in the UI, then it will not validate. This is a consequence of the positional XPath that is generated; the UI uses `unique-id` to qualify the xpath correctly. _However, because you aren't using the UI properly in the first place you probably haven't got useful unique-id's in place anyway_. You will be able to go through and resolve the warnings manually.
+- If you attempt to validate the Variable XPaths in the UI, then it will not validate. This is a consequence of the positional XPath that is generated; the UI uses `unique-id` to qualify the xpath correctly. _However, because you aren't using the UI properly in the first place you probably haven't got useful unique-id's in place anyway_.
+  - You will need to go through and resolve the warnings manually.
+  - If the UI is not managing your XPaths then changes, manual or via the UI (such as re-ordering) may cause undefined behaviour.
 - It may not be ideal if you have inline JSON transforms that use variable substitutions. Technically it's _correct_ but there's no guarantee
 
 
