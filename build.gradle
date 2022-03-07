@@ -1,0 +1,86 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+  id "java-library"
+}
+ext {
+  slf4jVersion = '1.7.36'
+  jacksonVersion='2.13.1'
+  interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
+  uiXpathWorkingDir=project.findProperty("uiXpathWorkingDir") ?: "$projectDir"
+  testResourcesDir = { ->
+    return "${project.projectDir}/src/test/resources".replaceAll("\\\\", "/")
+  }
+}
+
+defaultTasks 'clean', 'doWork'
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+group   = 'io.github.quotidian-ennui'
+
+repositories {
+  mavenCentral()
+}
+
+
+def asFileUrl(filepath) {
+  return "file:///" + new java.net.URI(null, filepath, null).toASCIIString();
+}
+
+configurations {
+  all*.exclude group: 'c3p0'
+  all*.exclude group: 'commons-logging'
+  all*.exclude group: 'javamail'
+  all*.exclude group: 'javax.mail', module: 'mail'
+  all*.exclude group: 'org.glassfish.hk2.external'
+  all*.exclude group: 'xalan', module: 'xalan'
+  all*.exclude group: 'net.sf.saxon', module: 'saxon'
+  all*.exclude group: 'org.codehaus.woodstox'
+  all*.exclude group: 'org.fasterxml.woodstox'
+  all*.exclude group: 'org.eclipse.jetty.orbit', module: 'javax.mail.glassfish'
+}
+
+configurations.all {
+  resolutionStrategy.cacheChangingModulesFor 60, "minutes"
+}
+
+dependencies {
+  implementation ("net.sf.practicalxml:practicalxml:1.1.19")
+  implementation ("net.sf.saxon:Saxon-HE:11.2")
+
+  implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+  implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+  implementation ("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
+
+  implementation ("org.slf4j:slf4j-api:$slf4jVersion")
+  runtimeOnly ("org.slf4j:slf4j-simple:$slf4jVersion")
+}
+
+task LauncherJar(type: Jar) {
+    appendix = "launcher"
+    ext.launcherClasspath = { ->
+      def verifyLibs = [
+              configurations.runtimeClasspath.collect { asFileUrl(it.getCanonicalPath()) }.join(' '),
+              asFileUrl(jar.archivePath.getCanonicalPath())
+              ]
+      return verifyLibs.join(' ')
+    }
+    manifest {
+        attributes ("Class-Path": launcherClasspath())
+    }
+}
+
+task doWork(type: JavaExec, dependsOn: [jar, LauncherJar]) {
+    group = 'Execution'
+    description = 'Emit XPaths for config-project.json'
+    classpath = files(LauncherJar.archivePath)
+    mainClass = 'io.github.quotidianennui.EmitVariableXpaths'
+    workingDir= uiXpathWorkingDir
+    args interlokConfigFile
+}
+
+task deleteGeneratedFiles(type: Delete) {
+  delete file(testResourcesDir() + "/adapter.xml.monolithic")
+}
+
+clean.dependsOn deleteGeneratedFiles

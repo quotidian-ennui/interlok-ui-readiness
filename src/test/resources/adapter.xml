@@ -1,0 +1,80 @@
+<adapter>
+  <unique-id>speedtest-elastic</unique-id>
+  <start-up-event-imp>com.adaptris.core.event.StandardAdapterStartUpEvent</start-up-event-imp>
+  <heartbeat-event-imp>com.adaptris.core.HeartbeatEvent</heartbeat-event-imp>
+  <shared-components>
+    <connections>
+      <elastic-rest-connection>
+        <unique-id>local-elasticsearch</unique-id>
+        <transport-url>${local.elastic.transporturl}</transport-url>
+        <elastic-client-creator class="default-elastic-rest-client"/>
+      </elastic-rest-connection>
+      <null-connection>
+        <unique-id>null-connection</unique-id>
+      </null-connection>
+    </connections>
+    <services>
+      <service-list>
+        <unique-id>doSpeedtest</unique-id>
+        <services>
+          <system-command-executor>
+            <unique-id>execute-speedtest</unique-id>
+            <timeout>
+              <unit>MINUTES</unit>
+              <interval>2</interval>
+            </timeout>
+            <command-builder class="default-system-command-builder">
+              <environment-metadata-keys/>
+              <environment-properties/>
+              <arguments>
+                <system-command-static-argument>
+                  <value>--json</value>
+                </system-command-static-argument>
+              </arguments>
+              <executable-path>${speedtest-cli.path}</executable-path>
+            </command-builder>
+            <output-capture class="system-command-overwrite-payload"/>
+          </system-command-executor>
+          <json-transform-service>
+            <unique-id>flatten-json-output</unique-id>
+            <source-json class="string-payload-data-input-parameter"/>
+            <mapping-spec class="file-data-input-parameter">
+              <url>${adapter.base.url}/config/flatten-speedtest-output.json</url>
+            </mapping-spec>
+            <target-json class="string-payload-data-output-parameter"/>
+            <metadata-filter class="remove-all-metadata-filter"/>
+          </json-transform-service>
+        </services>
+      </service-list>
+      <service-list>
+        <unique-id>doElasticINDEX</unique-id>
+        <services>
+          <standalone-producer>
+            <unique-id>index-elastic-document</unique-id>
+            <connection class="shared-connection">
+              <lookup-name>local-elasticsearch</lookup-name>
+            </connection>
+            <producer class="elastic-rest-single-operation">
+              <unique-id>gloomy-snyder</unique-id>
+              <index>${elastic.speedtest.index}</index>
+              <document-builder class="elastic-json-document-builder"/>
+              <action class="elastic-configured-action">
+                <action>INDEX</action>
+              </action>
+            </producer>
+          </standalone-producer>
+        </services>
+      </service-list>
+    </services>
+  </shared-components>
+  <channel-list>
+    <channel>
+      <unique-id>SPEEDTEST_TO_ES</unique-id>
+      <auto-start>${channel.auto.start}</auto-start>
+    </channel>
+    <channel>
+      <unique-id>ON_DEMAND</unique-id>
+      <auto-start>${channel.auto.start}</auto-start>
+    </channel>
+  </channel-list>
+</adapter>
