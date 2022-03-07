@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import net.sf.practicalxml.DomUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -36,7 +35,7 @@ public class EmitVariableXpaths {
       Map<String, String> variableXpaths = new HashMap<>();
       for (int i = 0; i < nodes.getLength(); i++) {
         Element e = (Element) nodes.item(i);
-        variableXpaths.put(DomUtil.getAbsolutePath(e), e.getTextContent());
+        variableXpaths.put(XmlHelper.buildPath(e), e.getTextContent());
       }
       print(variableXpaths);
     }
