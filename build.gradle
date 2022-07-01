@@ -8,7 +8,6 @@ ext {
   slf4jVersion = '1.7.36'
   jacksonVersion='2.13.3'
   junitJupiterVersion = '5.8.2'
-  mockitoVersion = '4.6.1'
   interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
   uiXpathWorkingDir=project.findProperty("uiXpathWorkingDir") ?: "$projectDir"
   testResourcesDir = { ->
