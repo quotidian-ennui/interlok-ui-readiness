@@ -2,10 +2,13 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
   id "java-library"
+  id 'jacoco'
 }
 ext {
   slf4jVersion = '1.7.36'
   jacksonVersion='2.13.2'
+  junitJupiterVersion = '5.8.2'
+  mockitoVersion = '4.6.1'
   interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
   uiXpathWorkingDir=project.findProperty("uiXpathWorkingDir") ?: "$projectDir"
   testResourcesDir = { ->
@@ -55,10 +58,22 @@ dependencies {
 
   implementation ("org.slf4j:slf4j-api:$slf4jVersion")
   runtimeOnly ("org.slf4j:slf4j-simple:$slf4jVersion")
+  testImplementation ("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+  testImplementation ("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+  // Extension pack for @SetEnvironmentVariable
+  testImplementation ("org.junit-pioneer:junit-pioneer:1.7.1")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion") {
+    because 'allows JUnit 3 and JUnit 4 tests to run'
+  }
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.8.2") {
+    because 'allows tests to run from IDEs that bundle older version of launcher'
+  }
+
 }
 
 task LauncherJar(type: Jar) {
-    appendix = "launcher"
+    archiveAppendix = "launcher"
     ext.launcherClasspath = { ->
       def verifyLibs = [
               configurations.runtimeClasspath.collect { asFileUrl(it.getCanonicalPath()) }.join(' '),
@@ -83,5 +98,17 @@ task doWork(type: JavaExec, dependsOn: [jar, LauncherJar]) {
 task deleteGeneratedFiles(type: Delete) {
   delete file(testResourcesDir() + "/adapter.xml.monolithic")
 }
+
+test {
+  useJUnitPlatform()
+}
+
+jacocoTestReport {
+  reports {
+    xml.required= true
+    html.required= true
+  }
+}
+
 
 clean.dependsOn deleteGeneratedFiles
