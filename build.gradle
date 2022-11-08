@@ -6,7 +6,7 @@ plugins {
 }
 ext {
   slf4jVersion = '2.0.3'
-  jacksonVersion='2.13.4'
+  jacksonVersion='2.14.0'
   junitJupiterVersion = '5.9.1'
   interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
   uiXpathWorkingDir=project.findProperty("uiXpathWorkingDir") ?: "$projectDir"
