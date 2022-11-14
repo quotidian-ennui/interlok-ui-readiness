@@ -3,11 +3,13 @@ import org.apache.tools.ant.taskdefs.condition.Os
 plugins {
   id "java-library"
   id 'jacoco'
+  id 'org.barfuin.gradle.jacocolog' version '2.0.0'
 }
+
 ext {
   slf4jVersion = '2.0.3'
-  jacksonVersion='2.14.0'
   junitJupiterVersion = '5.9.1'
+  javaxActivationVersion = '1.2.2'
   interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
   uiXpathWorkingDir=project.findProperty("uiXpathWorkingDir") ?: "$projectDir"
   testResourcesDir = { ->
@@ -29,21 +31,15 @@ def asFileUrl(filepath) {
   return "file:///" + new java.net.URI(null, filepath, null).toASCIIString();
 }
 
-configurations {
-  all*.exclude group: 'c3p0'
-  all*.exclude group: 'commons-logging'
-  all*.exclude group: 'javamail'
-  all*.exclude group: 'javax.mail', module: 'mail'
-  all*.exclude group: 'org.glassfish.hk2.external'
-  all*.exclude group: 'xalan', module: 'xalan'
-  all*.exclude group: 'net.sf.saxon', module: 'saxon'
-  all*.exclude group: 'org.codehaus.woodstox'
-  all*.exclude group: 'org.fasterxml.woodstox'
-  all*.exclude group: 'org.eclipse.jetty.orbit', module: 'javax.mail.glassfish'
-}
-
 configurations.all {
   resolutionStrategy.cacheChangingModulesFor 60, "minutes"
+  resolutionStrategy.dependencySubstitution {
+    substitute module('commons-logging:commons-logging') using module("org.slf4j:jcl-over-slf4j:$slf4jVersion")
+    substitute module("net.sf.saxon:saxon") using module ("net.sf.saxon:Saxon-HE:11.4")
+    substitute module('jakarta.activation:jakarta.activation-api:1.2.2') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
+    substitute module('javax.activation:activation') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
+    substitute module('javax.activation:javax.activation-api') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
+  }
 }
 
 dependencies {
@@ -51,9 +47,11 @@ dependencies {
   implementation ("net.sf.saxon:Saxon-HE:11.4")
 
   implementation ("org.apache.commons:commons-lang3:3.12.0")
-  implementation ("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
-  implementation ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-  implementation ("com.fasterxml.jackson.module:jackson-module-jaxb-annotations:$jacksonVersion")
+  implementation (platform("com.fasterxml.jackson:jackson-bom:2.14.0"))
+
+  implementation ("com.fasterxml.jackson.core:jackson-annotations")
+  implementation ("com.fasterxml.jackson.core:jackson-databind")
+  implementation ("com.fasterxml.jackson.module:jackson-module-jaxb-annotations")
 
   implementation ("org.slf4j:slf4j-api:$slf4jVersion")
   runtimeOnly ("org.slf4j:slf4j-simple:$slf4jVersion")
@@ -109,5 +107,5 @@ jacocoTestReport {
   }
 }
 
-
+check.dependsOn jacocoTestReport
 clean.dependsOn deleteGeneratedFiles
