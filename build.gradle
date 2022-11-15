@@ -58,7 +58,7 @@ dependencies {
   testImplementation ("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
   testImplementation ("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
   // Extension pack for @SetEnvironmentVariable
-  testImplementation ("org.junit-pioneer:junit-pioneer:1.8.0")
+  testImplementation ("org.junit-pioneer:junit-pioneer:1.9.0")
   testRuntimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion") {
     because 'allows JUnit 3 and JUnit 4 tests to run'
   }
