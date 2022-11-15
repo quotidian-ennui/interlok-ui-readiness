@@ -36,7 +36,7 @@ configurations.all {
   resolutionStrategy.dependencySubstitution {
     substitute module('commons-logging:commons-logging') using module("org.slf4j:jcl-over-slf4j:$slf4jVersion")
     substitute module("net.sf.saxon:saxon") using module ("net.sf.saxon:Saxon-HE:11.4")
-    substitute module('jakarta.activation:jakarta.activation-api:1.2.2') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
+    substitute module('jakarta.activation:jakarta.activation-api:2.1.0') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
     substitute module('javax.activation:activation') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
     substitute module('javax.activation:javax.activation-api') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
   }
