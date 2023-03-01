@@ -34,8 +34,9 @@ $ ./gradlew [-PinterlokConfigFile=/path/to/file]
 
 ## Additional info
 
+> Now requires Java 11 since Saxon-HE 12.0 && junit-pioneer 2.0.0 now require Java 11. Since Interlok 4.x is the latest stable, and it requires Java 11, it's probably a no brainer here.
+
 - You can override the working directory by using `-PuiXpathWorkingDir=/some/path` but bear in mind at that point _interlokConfigPath_ is relative to your specified working directory.
-- Compiled for Java8, not apropos of anything, It'll still work with Java 11.
 - It has no direct dependencies on interlok
 - If you attempt to validate the Variable XPaths in the UI, then it will not validate. This is a consequence of the positional XPath that is generated; the UI uses `unique-id` to qualify the xpath correctly. _However, because you aren't using the UI properly in the first place you probably haven't got useful unique-id's in place anyway_.
   - You will need to go through and resolve the warnings manually.
