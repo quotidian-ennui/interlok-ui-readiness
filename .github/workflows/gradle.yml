@@ -17,14 +17,8 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: 8
+        java-version: 11
         distribution: 'zulu'
-    - name: Setup Ubuntu
-      id: ubuntu-bootstrap
-      run: |
-        sudo apt-get -y -qq update
-        sudo apt-get -y -qq install haveged
-        sudo systemctl -q enable haveged --now
     - name: Gradle Build
       uses: gradle/gradle-build-action@v2
       with:
