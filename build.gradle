@@ -47,7 +47,7 @@ dependencies {
   implementation ("net.sf.saxon:Saxon-HE:12.2")
 
   implementation ("org.apache.commons:commons-lang3:3.12.0")
-  implementation (platform("com.fasterxml.jackson:jackson-bom:2.15.0"))
+  implementation (platform("com.fasterxml.jackson:jackson-bom:2.15.1"))
 
   implementation ("com.fasterxml.jackson.core:jackson-annotations")
   implementation ("com.fasterxml.jackson.core:jackson-databind")
