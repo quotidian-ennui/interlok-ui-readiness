@@ -1,0 +1,105 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL"
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '16 20 * * 0'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      security-events: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'zulu'
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: "java"
+        queries: security-and-quality
+        # This should include support for suppressions like
+        # @SuppressWarnings({"codeql [java/weak-cryptographic-algorithm]"})
+        # // lgtm[java/weak-cryptographic-algorithm] (// codeql[] doesn't work in 0.5.2?)
+        # advanced-security/java-alert-suppression doesn't exist or I need a GH token
+        packs: "codeql/java-queries:AlertSuppression.ql,codeql/java-queries:AlertSuppressionAnnotations.ql"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2.4.2
+      with:
+        gradle-version: wrapper
+    - name: CodeQL Build
+      uses: gradle/gradle-build-action@v2.4.2
+      with:
+        arguments: testClasses
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      id: code_analyzer
+      with:
+        category: "/language:java"
+        output: sarif-results
+        upload: false
+    # - name: Filter Sarif files
+    #   # Removes missing-override-annotation from the Sarif file completely
+    #   # Might be useful on a case-by-case basis.
+    #   # https://github.com/advanced-security/filter-sarif
+    #   # -**/*.java:java/missing-override-annotation
+    #   # But essentially the configuration we have is here
+    #   # Please discard all the 'java/missing-override-annotation' alerts from files
+    #   # matching **/*.java (so +/- is a keep/discard)
+    #   uses: advanced-security/filter-sarif@v1
+    #   with:
+    #     patterns: |
+    #       -**/*.java:java/missing-override-annotation
+    #     input: sarif-results/java.sarif
+    #     output: sarif-results/java.sarif
+    - name: Upload SARIF
+      id: sarif_upload
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: sarif-results/java.sarif
+    - name: Dismiss alerts
+      # If we're on the main branch then dismiss the alerts
+      # associated with the suppression checks above...
+      # Use the ID of the thing that did the uploaded to GH, in this case sarif_upload
+      # but could be code_analyzer if that didn't have upload: false.
+      if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+      uses: advanced-security/dismiss-alerts@v1
+      with:
+        sarif-id: ${{ steps.sarif_upload.outputs.sarif-id }}
+        sarif-file: sarif-results/java.sarif
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
