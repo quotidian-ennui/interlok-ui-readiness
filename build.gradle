@@ -43,7 +43,6 @@ configurations.all {
 }
 
 dependencies {
-  implementation ("net.sf.practicalxml:practicalxml:1.1.19")
   implementation ("net.sf.saxon:Saxon-HE:12.3")
 
   implementation ("org.apache.commons:commons-lang3:3.13.0")

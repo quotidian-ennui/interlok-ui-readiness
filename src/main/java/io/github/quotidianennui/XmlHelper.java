@@ -1,9 +1,13 @@
 package io.github.quotidianennui;
 
+import static java.util.Collections.emptyList;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -13,12 +17,12 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
-import net.sf.practicalxml.DomUtil;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class XmlHelper {
 
@@ -68,7 +72,7 @@ public class XmlHelper {
     if (parent instanceof Element) {
       buildPath((Element) parent, sb);
     }
-    String localName = DomUtil.getLocalName(elem);
+    String localName = localname(elem);
     sb.append("/").append(localName);
     String uid = uniqueIdOrNull(elem);
     // If there's a UID the append it to qualify it.
@@ -76,7 +80,7 @@ public class XmlHelper {
     if (!StringUtils.isBlank(uid) && !localName.equalsIgnoreCase("adapter")) {
       sb.append("[unique-id=\"").append(uid).append("\"]");
     } else {
-      List<Element> siblings = DomUtil.getSiblings(elem, localName);
+      List<Element> siblings = peers(elem, localName);
       if (siblings.size() > 1) {
         sb.append("[").append(getIndex(elem, siblings)).append("]");
       }
@@ -94,6 +98,26 @@ public class XmlHelper {
         return i + 1;
       }
     }
-    throw new IllegalArgumentException("element not amongst its siblings");
+    throw new IllegalArgumentException("element not amongst its peers");
   }
+
+  private static List<Element> peers(Element element, String match) {
+    Node parent = element.getParentNode();
+    if (Element.class.isAssignableFrom(parent.getClass())) {
+      NodeList children = parent.getChildNodes();
+      return filter(children).stream().filter((e) -> match.equals(localname(e))).collect(Collectors.toList());
+    }
+    return emptyList();
+  }
+
+  private static String localname(Element e) {
+    return e.getNamespaceURI() == null ? e.getTagName() : e.getLocalName();
+  }
+
+  private static List<Element> filter(final NodeList nodeList) {
+    return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).filter((e) -> e instanceof Element).
+        map((e) -> (Element) e).
+        collect(Collectors.toList());
+  }
+
 }

@@ -6,8 +6,8 @@
     <connections>
       <elastic-rest-connection>
         <unique-id>local-elasticsearch</unique-id>
-        <transport-url>${local.elastic.transporturl}</transport-url>
-        <transport-url>${local.elastic.transporturl}</transport-url>
+        <transport-url>${local.elastic.transporturl.1}</transport-url>
+        <transport-url>${local.elastic.transporturl.2}</transport-url>
         <elastic-client-creator class="default-elastic-rest-client"/>
       </elastic-rest-connection>
       <null-connection>
