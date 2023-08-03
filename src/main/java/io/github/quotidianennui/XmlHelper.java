@@ -105,9 +105,7 @@ public class XmlHelper {
     Node parent = element.getParentNode();
     if (Element.class.isAssignableFrom(parent.getClass())) {
       NodeList children = parent.getChildNodes();
-      return toList(children).stream().filter((e) -> e instanceof Element).map((e) -> (Element) e).filter((e) ->
-          match.equals(localname(e))
-      ).collect(Collectors.toList());
+      return filter(children).stream().filter((e) -> match.equals(localname(e))).collect(Collectors.toList());
     }
     return emptyList();
   }
@@ -116,8 +114,10 @@ public class XmlHelper {
     return e.getNamespaceURI() == null ? e.getTagName() : e.getLocalName();
   }
 
-  private static List<Node> toList(final NodeList nodeList) {
-    return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).collect(Collectors.toList());
+  private static List<Element> filter(final NodeList nodeList) {
+    return IntStream.range(0, nodeList.getLength()).mapToObj(nodeList::item).filter((e) -> e instanceof Element).
+        map((e) -> (Element) e).
+        collect(Collectors.toList());
   }
 
 }
