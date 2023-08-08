@@ -53,7 +53,7 @@ public class EmitVariableXpaths {
     return new File(inputFile.getParentFile(), inputFile.getName() + ".monolithic");
   }
 
-  public static void main(String[] argv) throws Exception {
+  public static void main(String... argv) throws Exception {
     String input = argv[0];
     new EmitVariableXpaths(new File(input)).printXpaths();
   }
