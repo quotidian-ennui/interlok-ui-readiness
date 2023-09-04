@@ -7,7 +7,7 @@ plugins {
 }
 
 ext {
-  slf4jVersion = '2.0.7'
+  slf4jVersion = '2.0.9'
   junitJupiterVersion = '5.10.0'
   javaxActivationVersion = '1.2.2'
   interlokConfigFile=project.findProperty("interlokConfigFile") ?: "$projectDir/src/test/resources/adapter.xml"
