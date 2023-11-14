@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 plugins {
   id "java-library"
   id 'jacoco'
@@ -97,6 +95,9 @@ task deleteGeneratedFiles(type: Delete) {
 
 test {
   useJUnitPlatform()
+  reports {
+    junitXml.enabled = true
+  }
 }
 
 jacocoTestReport {

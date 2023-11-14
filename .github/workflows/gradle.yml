@@ -8,9 +8,15 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      statuses: write
+      checks: write
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -24,6 +30,12 @@ jobs:
       with:
         gradle-version: wrapper
         arguments: check
+    - name: Publish Test Report
+      if: success() || failure()
+      uses: scacap/action-surefire-report@v1
+      with:
+        report_paths: '**/build/test-results/test/TEST-*.xml'
+
 
   dependabot-merge:
     needs: build
