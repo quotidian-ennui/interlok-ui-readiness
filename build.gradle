@@ -33,7 +33,7 @@ configurations.all {
   resolutionStrategy.cacheChangingModulesFor 60, "minutes"
   resolutionStrategy.dependencySubstitution {
     substitute module('commons-logging:commons-logging') using module("org.slf4j:jcl-over-slf4j:$slf4jVersion")
-    substitute module("net.sf.saxon:saxon") using module ("net.sf.saxon:Saxon-HE:12.3")
+    substitute module("net.sf.saxon:saxon") using module ("net.sf.saxon:Saxon-HE:12.4")
     substitute module('jakarta.activation:jakarta.activation-api:1.2.2') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
     substitute module('javax.activation:activation') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
     substitute module('javax.activation:javax.activation-api') using module("com.sun.activation:jakarta.activation:$javaxActivationVersion")
@@ -41,7 +41,7 @@ configurations.all {
 }
 
 dependencies {
-  implementation ("net.sf.saxon:Saxon-HE:12.3")
+  implementation ("net.sf.saxon:Saxon-HE:12.4")
 
   implementation ("org.apache.commons:commons-lang3:3.14.0")
   implementation (platform("com.fasterxml.jackson:jackson-bom:2.16.0"))
