@@ -2,3 +2,4 @@ build
 *.class
 adapter.xml.monolithic
 .idea
+gradle.properties
