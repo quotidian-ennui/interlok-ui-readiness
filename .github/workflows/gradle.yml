@@ -34,7 +34,7 @@ jobs:
         ./gradlew check
     - name: Publish Test Report
       if: success() || failure()
-      uses: scacap/action-surefire-report@v1.7.3
+      uses: scacap/action-surefire-report@v1.8.0
       with:
         report_paths: '**/build/test-results/test/TEST-*.xml'
 
